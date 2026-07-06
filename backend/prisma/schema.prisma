@@ -1,0 +1,142 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+
+}
+
+enum Modality {
+  CONSERVACAO
+  PLANTIO_LIVRE
+  APP
+  POMAR
+}
+
+enum ContractStatus {
+  DRAFT
+  ACTIVE
+  FINISHED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  PAID
+  OVERDUE
+}
+
+model Producer {
+  id             String     @id @default(uuid()) @map("id")
+  name           String
+  cpfCnpj        String     @unique @map("cpf_cnpj")
+  rg             String?
+  address        String?
+  phone          String?
+  email          String? @unique
+  createdAt      DateTime   @default(now()) @map("created_at")
+  updatedAt      DateTime   @updatedAt @map("updated_at")
+
+  properties     Property[]
+  contracts      Contract[]
+  attendances    TrainingAttendance[]
+  trees          Tree[]
+
+  @@map("producers")
+}
+
+model Property {
+  id             String   @id @default(uuid()) @map("id")
+  producerId     String   @map("producer_id")
+  name           String
+  carNumber      String?  @map("car_number")
+  areaHa         Float    @map("area_ha")
+  moduloFiscal   Float?   @map("modulo_fiscal")
+  geojsonPolygon String? @map("geojson_polygon")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  producer       Producer @relation(fields: [producerId], references: [id])
+
+  @@map("properties")
+}
+
+model Contract {
+  id                 String         @id @default(uuid()) @map("id")
+  producerId         String         @map("producer_id")
+  modality           Modality
+  status             ContractStatus @default(DRAFT)
+  propertyAreaHa     Float?         @map("property_area_ha")
+  totalPaymentExpected Float?       @map("total_payment_expected")
+  signedAt           DateTime?      @map("signed_at")
+  createdAt          DateTime       @default(now()) @map("created_at")
+  updatedAt          DateTime       @updatedAt @map("updated_at")
+
+  producer           Producer       @relation(fields: [producerId], references: [id])
+  trees              Tree[]
+  payments           Payment[]
+  complementaryActivities ComplementaryActivity[]
+
+  @@map("contracts")
+}
+
+model Tree {
+  id             String   @id @default(uuid()) @map("id")
+  contractId     String   @map("contract_id")
+  latitude       Float
+  longitude      Float
+  plantedDate    DateTime? @map("planted_date")
+  isVerified     Boolean  @default(false) @map("is_verified")
+  photoUrl       String?  @map("photo_url")
+  syncStatus     String   @default("PENDING") @map("sync_status")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  contract       Contract @relation(fields: [contractId], references: [id])
+  producerId     String   @map("producer_id")
+  producer       Producer @relation(fields: [producerId], references: [id])
+
+  @@map("trees")
+}
+
+model Payment {
+  id             String        @id @default(uuid()) @map("id")
+  contractId     String        @map("contract_id")
+  parcel         String
+  amount         Float
+  dueDate        DateTime      @map("due_date")
+  status         PaymentStatus @default(PENDING)
+  paidAt         DateTime?     @map("paid_at")
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  contract       Contract      @relation(fields: [contractId], references: [id])
+
+  @@map("payments")
+}
+
+model TrainingAttendance {
+  id             String   @id @default(uuid()) @map("id")
+  producerId     String   @map("producer_id")
+  topic          String
+  date           DateTime
+  certificateUrl String?  @map("certificate_url")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  producer       Producer @relation(fields: [producerId], references: [id])
+
+  @@map("training_attendance")
+}
+
+model ComplementaryActivity {
+  id             String   @id @default(uuid()) @map("id")
+  contractId     String   @map("contract_id")
+  activityType   String   @map("activity_type")
+  latitude       Float?
+  longitude      Float?
+  status         String   @default("PENDING")
+  createdAt      DateTime @default(now()) @map("created_at")
+
+  contract       Contract @relation(fields: [contractId], references: [id])
+
+  @@map("complementary_activities")
+}

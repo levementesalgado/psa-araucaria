@@ -1,0 +1,31 @@
+services:
+  postgres:
+    image: postgis/postgis:15-3.4
+    environment:
+      POSTGRES_DB: psa_araucaria
+      POSTGRES_USER: psa
+      POSTGRES_PASSWORD: psa123
+    ports: ["5432:5432"]
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: { test: ["CMD-SHELL", "pg_isready -U psa"], interval: 5s, timeout: 5s, retries: 5 }
+
+  redis:
+    image: redis:alpine
+    ports: ["6379:6379"]
+    volumes: [redisdata:/data]
+
+  api:
+    build: ./backend
+    ports: ["3000:3000"]
+    environment:
+      DATABASE_URL: postgresql://psa:psa123@postgres:5432/psa_araucaria
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: dev-secret-change-in-prod
+      AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+      AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+      S3_BUCKET: psa-araucaria-uploads
+    depends_on:
+      postgres: { condition: service_healthy }
+      redis: { condition: service_started }
+
+volumes: { pgdata:, redisdata: }

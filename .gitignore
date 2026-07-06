@@ -1,0 +1,42 @@
+# Node
+node_modules/
+dist/
+*.log
+.env
+
+# Java
+*.class
+*.jar
+target/
+!.gradle/wrapper/gradle-wrapper.jar
+
+# Android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.aab
+
+# Python
+__pycache__/
+*.pyc
+venv/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Keys & secrets
+*_key.md
+*_key.txt
+*_token*
+*.pem
+*.key
+secrets/
