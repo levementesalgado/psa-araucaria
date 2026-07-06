@@ -1,6 +1,6 @@
 import { NavLink, Outlet, useNavigate } from 'react-router-dom';
 import { clsx } from 'clsx';
-import { useAuth } from '../hooks/useAuth';
+import { useAuth } from '../../hooks/useAuth.tsx';
 
 const links = [
   { to: '/', label: 'Início' },

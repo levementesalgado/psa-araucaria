@@ -8,7 +8,7 @@ import { TreesPage } from './pages/TreesPage';
 import { NewTreePage } from './pages/NewTreePage';
 import { PaymentsPage } from './pages/PaymentsPage';
 import { ProfilePage } from './pages/ProfilePage';
-import { useAuth } from './hooks/useAuth';
+import { useAuth } from './hooks/useAuth.tsx';
 
 function PrivateRoute({ children }: { children: React.ReactNode }) {
   const { isAuthenticated } = useAuth();
